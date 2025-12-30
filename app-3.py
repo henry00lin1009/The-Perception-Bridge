@@ -212,9 +212,24 @@ def render_odds_visual(market):
         
         st.markdown(f"**{market.get('question', 'Market')}**")
         
-        for out, price in zip(outcomes, prices):
-            p_val = float(price)
-            st.progress(p_val, text=f"{out}: {p_val:.1%}")
+        # Check for Binary Yes/No
+        lower_outcomes = [str(o).lower() for o in outcomes]
+        if set(lower_outcomes) == {"yes", "no"} and len(outcomes) == 2:
+            # It's a binary market
+            yes_idx = lower_outcomes.index("yes")
+            yes_price = float(prices[yes_idx])
+            no_idx = lower_outcomes.index("no")
+            no_price = float(prices[no_idx])
+            
+            # Single Bar: Progress represents YES probability
+            # Label: "Yes: 65% | No: 35%"
+            st.progress(yes_price, text=f"Yes: {yes_price:.1%}  |  No: {no_price:.1%}")
+            
+        else:
+            # Standard Multi-Choice Render
+            for out, price in zip(outcomes, prices):
+                p_val = float(price)
+                st.progress(p_val, text=f"{out}: {p_val:.1%}")
             
     except Exception as e:
         st.error(f"Visual render error: {e}")
@@ -946,48 +961,48 @@ else:
             
             col_twitter, col_reddit = st.columns(2)
         
-        # Parallel Execution for both sources
-        with st.status("Analyzing both platforms...", expanded=True):
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                future_tw = executor.submit(analyze_topic_data, user_text, "X")
-                future_rd = executor.submit(analyze_topic_data, user_text, "Reddit")
-                
-                res_tw = future_tw.result()
-                res_rd = future_rd.result()
-        
-        # LEFT COLUMN: X
-        with col_twitter:
-            st.markdown("### X")
-            if res_tw:
-                # Split metrics
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Sentiment", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                m2.metric("Confidence", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
-                m3.metric("Volume", f"{res_tw['count']}")
-                
-                st.info(res_tw['discussion'])
-            else:
-                st.error("No X data found.")
-                
-        # RIGHT COLUMN: REDDIT
-        with col_reddit:
-            st.markdown("### Reddit")
-            if res_rd:
-                # Split metrics
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Sentiment", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                m2.metric("Confidence", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
-                m3.metric("Volume", f"{res_rd['count']}")
-                
-                st.info(res_rd['discussion'])
-            else:
-                st.error("No Reddit data found.")
-
-        st.divider()
-        
-        # CROSS ANALYSIS
-        if res_tw and res_rd:
-            st.write("## Comparative Analysis")
-            with st.spinner("Comparing platform vibes..."):
-                comparison = generate_cross_platform_comparison(user_text, res_tw, res_rd)
-                st.markdown(comparison)
+            # Parallel Execution for both sources
+            with st.status("Analyzing both platforms...", expanded=True):
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    future_tw = executor.submit(analyze_topic_data, user_text, "X")
+                    future_rd = executor.submit(analyze_topic_data, user_text, "Reddit")
+                    
+                    res_tw = future_tw.result()
+                    res_rd = future_rd.result()
+            
+            # LEFT COLUMN: X
+            with col_twitter:
+                st.markdown("### X")
+                if res_tw:
+                    # Split metrics
+                    m1, m2, m3 = st.columns(3)
+                    m1.metric("Sentiment", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
+                    m2.metric("Confidence", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
+                    m3.metric("Volume", f"{res_tw['count']}")
+                    
+                    st.info(res_tw['discussion'])
+                else:
+                    st.error("No X data found.")
+                    
+            # RIGHT COLUMN: REDDIT
+            with col_reddit:
+                st.markdown("### Reddit")
+                if res_rd:
+                    # Split metrics
+                    m1, m2, m3 = st.columns(3)
+                    m1.metric("Sentiment", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
+                    m2.metric("Confidence", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
+                    m3.metric("Volume", f"{res_rd['count']}")
+                    
+                    st.info(res_rd['discussion'])
+                else:
+                    st.error("No Reddit data found.")
+    
+            st.divider()
+            
+            # CROSS ANALYSIS
+            if res_tw and res_rd:
+                st.write("## Comparative Analysis")
+                with st.spinner("Comparing platform vibes..."):
+                    comparison = generate_cross_platform_comparison(user_text, res_tw, res_rd)
+                    st.markdown(comparison)
