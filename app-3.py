@@ -63,7 +63,8 @@ def get_gemini_embeddings(texts):
             r = requests.post(
                 f"https://generativelanguage.googleapis.com/v1beta/{GEMINI_EMBED_MODEL}:batchEmbedContents",
                 params={"key": GEMINI_API_KEY},
-                json=payload
+                json=payload,
+                timeout=10
             )
             if r.status_code != 200:
                 st.error(f"Embedding API Error: {r.text}")
@@ -92,7 +93,8 @@ def fetch_events():
         try:
             r = requests.get(
                 POLY_API_URL, 
-                params={"closed": "false", "active": "true", "limit": 500, "offset": offset}
+                params={"closed": "false", "active": "true", "limit": 500, "offset": offset},
+                timeout=10
             )
             if r.status_code == 200:
                 return r.json()
@@ -318,7 +320,8 @@ def fetch_tweets(source, is_event=True, max_pages=TWEET_MAX_PAGES, max_tweets=TW
                 r = requests.get(
                     "https://api.twitterapi.io/twitter/tweet/advanced_search",
                     headers={"X-API-Key": TWITTER_API_KEY},
-                    params={"query": q, "queryType": "Top", "cursor": cursor}
+                    params={"query": q, "queryType": "Top", "cursor": cursor},
+                    timeout=10
                 )
                 if r.status_code != 200:
                     st.error(f"API Error: {r.status_code} - {r.text}")
@@ -376,7 +379,8 @@ Tweets:
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1/{GEMINI_MODEL}:generateContent",
         params={"key": GEMINI_API_KEY},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
 
     try:
@@ -423,7 +427,8 @@ def generate_comparison(topic, general_analysis, market_insights, avg_score, con
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}",
         headers={"Content-Type": "application/json"},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
     
     if r.status_code != 200:
@@ -477,7 +482,8 @@ def generate_deep_insights(topic, narrative, comparison, history_summary, market
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}",
         headers={"Content-Type": "application/json"},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
     
     if r.status_code != 200:
@@ -536,7 +542,8 @@ def generate_cross_platform_comparison(topic, twitter_data, reddit_data):
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}",
         headers={"Content-Type": "application/json"},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
     
     if r.status_code != 200:
@@ -577,7 +584,8 @@ def analyze_general_topic(topic, tweets):
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1/{GEMINI_MODEL}:generateContent",
         params={"key": GEMINI_API_KEY},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
 
     try:
@@ -641,7 +649,8 @@ def fetch_historical_sentiment(topic, current_confidence=None, current_sentiment
             r = requests.get(
                 "https://api.twitterapi.io/twitter/tweet/advanced_search",
                 headers={"X-API-Key": TWITTER_API_KEY},
-                params={"query": query, "queryType": "Top"} 
+                params={"query": query, "queryType": "Top"},
+                timeout=10
             )
             
             if r.status_code == 200:
@@ -710,7 +719,8 @@ def analyze_history_with_gemini(df, topic):
     r = requests.post(
         f"https://generativelanguage.googleapis.com/v1/{GEMINI_MODEL}:generateContent",
         params={"key": GEMINI_API_KEY},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=10
     )
 
     try:
@@ -737,7 +747,7 @@ def fetch_reddit(query, limit=50):
     }
 
     try:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, timeout=10)
         if r.status_code != 200:
             st.error(f"Reddit RSS Error: {r.status_code}")
             return []
