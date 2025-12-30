@@ -200,6 +200,27 @@ def find_relevant_events(user_text, events):
 
 
 # ======================================================
+# 2.5️⃣ HELPER: RENDER ODDS VISUAL
+# ======================================================
+def render_odds_visual(market):
+    try:
+        raw_outcomes = market.get("outcomes", "[]")
+        raw_prices = market.get("outcomePrices", "[]")
+        
+        outcomes = json.loads(raw_outcomes) if isinstance(raw_outcomes, str) else raw_outcomes
+        prices = json.loads(raw_prices) if isinstance(raw_prices, str) else raw_prices
+        
+        st.markdown(f"**{market.get('question', 'Market')}**")
+        
+        for out, price in zip(outcomes, prices):
+            p_val = float(price)
+            st.progress(p_val, text=f"{out}: {p_val:.1%}")
+            
+    except Exception as e:
+        st.error(f"Visual render error: {e}")
+
+
+# ======================================================
 # 3️⃣ GEMINI: GENERATE KEYWORDS FROM MARKETS
 # ======================================================
 def get_keywords_from_market(ev):
@@ -457,16 +478,28 @@ def generate_cross_platform_comparison(topic, twitter_data, reddit_data):
     """
     Compares the narratives from Twitter and Reddit.
     """
+    # Prepare raw text samples (top 50)
+    tw_text = "\n".join([f"- {t['text']}" for t in twitter_data.get('data', [])[:50]])
+    rd_text = "\n".join([f"- {p['text']}" for p in reddit_data.get('data', [])[:50]])
+
     prompt = f"""
     Compare the public sentiment and discussion around '{topic}' on two different platforms:
     
     [PLATFORM A: X]
     Narrative: {twitter_data['narrative']}
     Sentiment: {twitter_data['sentiment']:.2f} (Confidence: {twitter_data['confidence']:.0%})
+    Raw Samples:
+    {tw_text}
     
     [PLATFORM B: REDDIT]
     Narrative: {reddit_data['narrative']}
     Sentiment: {reddit_data['sentiment']:.2f} (Confidence: {reddit_data['confidence']:.0%})
+    Raw Samples:
+    {rd_text}
+    
+    Task:
+    Use the RAW SAMPLES to derive the "Vibe" and justify the confidence levels.
+
     
     MAX 3 bullet points per section. Be extremely concise.
     
@@ -846,7 +879,7 @@ else:
                 status.update(label="Analysis complete!", state="complete", expanded=False)
 
             # RENDER SECTION 1
-            st.header("1. Public Sentiment Analysis")
+            st.header("Public Sentiment Analysis")
             col1, col2, col3 = st.columns(3)
             col1.metric("Sentiment Score", f"{result['sentiment']:.2f}")
             col2.metric("Confidence Level", f"{result['confidence']:.0%}")
@@ -869,7 +902,7 @@ else:
             st.divider()
 
             # RENDER SECTION 2 (Legacy Logic maintained for Single View)
-            st.header("2. Relevant Polymarket Events")
+            st.header("Relevant Polymarket Events")
             with st.spinner("Finding markets..."):
                 events = fetch_events()
                 final_events = find_relevant_events(user_text, events)
@@ -897,7 +930,7 @@ else:
                          st.code(pm['sentiment'], language=None)
             
             # Deep Insights
-            st.header("3. Deep Insights")
+            st.header("Deep Insights")
             with st.spinner("Synthesizing..."):
                 comp_text = generate_comparison(user_text, result['narrative'], market_insights, result['sentiment'], result['confidence'])
                 # We skip history summary generation for speed in this refactor, or we can add it back if critical
@@ -927,11 +960,11 @@ else:
             st.markdown("### X")
             if res_tw:
                 # Split metrics
-                m1, m2 = st.columns(2)
+                m1, m2, m3 = st.columns(3)
                 m1.metric("Sentiment", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
                 m2.metric("Confidence", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
+                m3.metric("Volume", f"{res_tw['count']}")
                 
-                st.caption(f"Volume: {res_tw['count']} posts")
                 st.info(res_tw['discussion'])
             else:
                 st.error("No X data found.")
@@ -941,11 +974,11 @@ else:
             st.markdown("### Reddit")
             if res_rd:
                 # Split metrics
-                m1, m2 = st.columns(2)
+                m1, m2, m3 = st.columns(3)
                 m1.metric("Sentiment", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
                 m2.metric("Confidence", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
+                m3.metric("Volume", f"{res_rd['count']}")
                 
-                st.caption(f"Volume: {res_rd['count']} posts")
                 st.info(res_rd['discussion'])
             else:
                 st.error("No Reddit data found.")
@@ -954,7 +987,7 @@ else:
         
         # CROSS ANALYSIS
         if res_tw and res_rd:
-            st.subheader("Comparative Analysis")
+            st.write("## Comparative Analysis")
             with st.spinner("Comparing platform vibes..."):
                 comparison = generate_cross_platform_comparison(user_text, res_tw, res_rd)
                 st.markdown(comparison)
