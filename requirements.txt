@@ -1,0 +1,7 @@
+streamlit
+requests
+numpy
+pandas
+vaderSentiment
+python-dateutil
+toml
