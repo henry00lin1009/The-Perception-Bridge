@@ -927,15 +927,19 @@ else:
                 st.write(f"Found {len(final_events)} relevant markets.")
                 
                 def process_market(ev):
-                    # Always fetch X for single view
-                    tweets = fetch_tweets(ev, is_event=True)
-                    
-                    sentiment = analyze_with_gemini(ev["title"], tweets)
-                    odds_str = " | ".join([m['formatted_odds'] for m in ev['markets']])
-                    return {"event": ev, "title": ev['title'], "odds": odds_str, "sentiment": sentiment}
+                    try:
+                        # Always fetch X for single view
+                        tweets = fetch_tweets(ev, is_event=True)
+                        
+                        sentiment = analyze_with_gemini(ev["title"], tweets)
+                        odds_str = " | ".join([m['formatted_odds'] for m in ev['markets']])
+                        return {"event": ev, "title": ev['title'], "odds": odds_str, "sentiment": sentiment}
+                    except Exception as e:
+                        return {"event": ev, "title": ev['title'], "odds": "Error", "sentiment": f"Analysis failed: {e}"}
 
-                with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-                    processed_markets = list(executor.map(process_market, final_events))
+                with st.spinner("Analyzing market odds and sentiment..."):
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+                        processed_markets = list(executor.map(process_market, final_events))
 
                 for pm in processed_markets:
                     market_insights.append(pm)
