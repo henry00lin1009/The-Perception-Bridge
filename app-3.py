@@ -915,8 +915,8 @@ else:
             vibe_label = get_vibe_label(result['sentiment'])
             conviction_label = get_conviction_label(result['confidence'])
             
-            col1.metric("Vibe", vibe_label, help=f"Score: {result['sentiment']:.2f}")
-            col2.metric("Conviction", conviction_label, help=f"Level: {result['confidence']:.0%}")
+            col1.metric("Vibe", vibe_label, delta=f"{result['sentiment']:.2f}")
+            col2.metric("Conviction", conviction_label, delta=f"{result['confidence']:.0%}", delta_color="off")
             col3.metric("Chatter Volume", f"{result['count']}")
             
             st.subheader("What they're saying")
@@ -999,8 +999,8 @@ else:
                 if res_tw:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", get_vibe_label(res_tw['sentiment']), help=f"{res_tw['sentiment']:.2f}")
-                    m2.metric("Conviction", get_conviction_label(res_tw['confidence']), help=f"{res_tw['confidence']:.0%}")
+                    m1.metric("Vibe", get_vibe_label(res_tw['sentiment']), delta=f"{res_tw['sentiment']:.2f}")
+                    m2.metric("Conviction", get_conviction_label(res_tw['confidence']), delta=f"{res_tw['confidence']:.0%}", delta_color="off")
                     m3.metric("Volume", f"{res_tw['count']}")
                     
                     st.info(res_tw['discussion'])
@@ -1013,8 +1013,8 @@ else:
                 if res_rd:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", get_vibe_label(res_rd['sentiment']), help=f"{res_rd['sentiment']:.2f}")
-                    m2.metric("Conviction", get_conviction_label(res_rd['confidence']), help=f"{res_rd['confidence']:.0%}")
+                    m1.metric("Vibe", get_vibe_label(res_rd['sentiment']), delta=f"{res_rd['sentiment']:.2f}")
+                    m2.metric("Conviction", get_conviction_label(res_rd['confidence']), delta=f"{res_rd['confidence']:.0%}", delta_color="off")
                     m3.metric("Volume", f"{res_rd['count']}")
                     
                     st.info(res_rd['discussion'])
