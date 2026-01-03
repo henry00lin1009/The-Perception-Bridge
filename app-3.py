@@ -108,7 +108,7 @@ def fetch_events():
         all_events.extend(page)
         
     if not all_events:
-        st.error("Error fetching Polymarket events")
+        st.error("Couldn't reach the prediction markets.")
         return []
 
     cleaned = []
@@ -342,11 +342,11 @@ def fetch_tweets(source, is_event=True, max_pages=TWEET_MAX_PAGES, max_tweets=TW
 
     # Retry Strategy
     if not tweets and query != fallback_query:
-        st.warning(f"0 tweets found. Retrying with broader query...")
+        st.warning(f"Too specific. Widening the search net...")
         st.write(f"Searching: `{fallback_query}`")
         tweets = run_search(fallback_query)
 
-    st.write(f"Total tweets found: {len(tweets)}")
+    st.write(f"Conversations found: {len(tweets)}")
     return tweets[:max_tweets]
 
 
@@ -368,7 +368,7 @@ Give sentiment ONLY from tweets:
 1) Public Sentiment
 2) Does it imply YES or NO?
 3) Rough probability (0-100%)
-Be concise. Use simple, clear English.
+Be concise. Explain like I'm 5. No jargon. NO EMOJIS.
 Tweets:
 {text}
 """
@@ -408,15 +408,15 @@ def generate_comparison(topic, general_analysis, market_insights, avg_score, con
     {market_text}
     
     Compare what the public is saying vs. how people are betting.
-    Use simple, straightforward language. BE CONCISE.
+    Explain the gap between the vibe (Twitter) and the money (Polymarket).
+    Write like a smart friend. Short sentences. NO EMOJIS.
     Constraint: You only have CURRENT market odds. Do NOT hallucinate trends/shifts.
-    CRITICAL: NO EMOJIS.
     
     Format:
-    ### Agreements
+    ### Where they agree
     (Where do tweets and betting odds align?)
     
-    ### Disagreements
+    ### Where they clash
     (Where is the public irrational vs the market? Or where is the market missing a signal?)
     """
 
@@ -439,7 +439,7 @@ def generate_deep_insights(topic, narrative, comparison, history_summary, market
     market_text = "\n".join([f"- {m['title']}: {m['odds']}" for m in market_insights])
     
     prompt = f"""
-    Act as a Lead Data Researcher. You have just analyzed '{topic}' across social media (Twitter), prediction markets (Polymarket), and historical trends.
+    Act as a smart, neutral analyst. You have just analyzed '{topic}' across social media (Twitter), prediction markets (Polymarket), and historical trends.
     
     [Full Context]
     1. Narrative: {narrative}
@@ -450,27 +450,26 @@ def generate_deep_insights(topic, narrative, comparison, history_summary, market
     TASK:
     Using all the data above, generate a concise but high-value insights section.
     1. Identify the most significant divergences between public sentiment and market probabilities.
-    2. Explain possible reasons for these divergences based on context or patterns in the tweets.
-    3. Highlight notable agreements that reinforce broader patterns.
-    4. Provide actionable or surprising takeaways for the user—what does this imply about future events or the state of perception vs reality?
-    5. Rank insights: which events are the most interesting or important to watch based on divergence or market confidence.
-    6. Avoid simply repeating odds or sentiment scores; synthesize the information into narrative insights that reveal patterns and implications.
+    2. Explain possible reasons.
+    3. Highlight notable agreements.
+    4. Tell me what really matters—what does this imply about future events?
+    5. Avoid simply repeating odds or sentiment scores; synthesize the information into narrative insights.
     
     Format:
-    ### Ranked Strategic Insights
+    ### Key Takeaways
     (1. Most Important Insight - Explain the divergence/agreement and WHY it matters. Keep it brief.)
     (2. ...)
     (3. ...)
     
-    ### Forward-Looking Implications
+    ### What this means
     (What does this state of perception vs reality imply for the future? Be concise.)
 
     CRITICAL: NO EMOJIS.
     Constraint: You only have CURRENT market odds. Do NOT hallucinate that they have "shifted" or "repriced" recently unless you have historical proof.
     STYLE GUIDE:
     - Be extremely concise.
-    - Use short, punchy sentences (Axios style).
-    - Avoid flowery or dramatic language.
+    - Use short, punchy sentences.
+    - No fluff.
     - Get straight to the point.
     """
     
@@ -513,8 +512,7 @@ def generate_cross_platform_comparison(topic, twitter_data, reddit_data):
     {rd_text}
     
     Task:
-    Use the RAW SAMPLES to derive the "Vibe" and justify the confidence levels.
-
+    Compare the vibe on X vs Reddit.
     
     MAX 3 bullet points per section. Be extremely concise.
     
@@ -527,8 +525,8 @@ def generate_cross_platform_comparison(topic, twitter_data, reddit_data):
     - (Point 1)
     - (Point 2)
     
-    ### Confidence Check
-    - (Compare certainty levels. Does high confidence map to reality? Keep it to 1-2 sentences.)
+    ### Who is surer?
+    (Compare certainty levels. Does high confidence map to reality? Keep it to 1-2 sentences.)
     
     CRITICAL: NO EMOJIS.
     """
@@ -550,7 +548,7 @@ def generate_cross_platform_comparison(topic, twitter_data, reddit_data):
 # ======================================================
 def analyze_general_topic(topic, tweets):
     if not tweets:
-        return "No tweets found to analyze."
+        return "The internet is silent on this."
 
     text = "\n".join([t['text'] for t in tweets[:50]]) # Analyze top 50 for speed
 
@@ -562,15 +560,15 @@ def analyze_general_topic(topic, tweets):
     
     TASK:
     Provide a summary in 2 distinct sections separated by "|||".
-    CRITICAL: DO NOT USE EMOJIS. Use simple, direct language (ELI5).
+    CRITICAL: DO NOT USE EMOJIS. Use simple, direct language. ELI5. No jargon.
     
     Format:
-    Current Narrative
+    What's happening
     1. Current Status (1-2 sentences): Include price/level if applicable, describe what is happening NOW.
-    2. Key Ongoing Events: List 3-5 concrete events being discussed (policy, releases, etc.). Avoid speculation.
+    2. Key Ongoing Events: List 3-5 concrete events being discussed.
     (Focus on RECENT developments only. Be concise, factual, and time-anchored.)
     |||
-    Public Discussion
+    What people are saying
     (3-4 short bullet points summarizing main narratives found in the provided tweets)
     """
 
@@ -688,7 +686,7 @@ def fetch_historical_sentiment(topic, current_confidence=None, current_sentiment
 # ======================================================
 def analyze_history_with_gemini(df, topic):
     if df.empty:
-        return "No historical data to analyze."
+        return "Not enough history to show a trend."
         
     # Convert data to a simple string for the LLM
     data_str = df.to_csv(index=False)
@@ -703,7 +701,7 @@ def analyze_history_with_gemini(df, topic):
     - Identify any major shifts or anomalies.
     - Explain what the relationship between Sentiment and Confidence likely means.
     - Keep it concise (2-3 sentences max).
-    - Explain simply like you are talking to a friend. Avoid technical jargon.
+    - Explain like I'm 5. Avoid technical jargon.
     - CRITICAL: DO NOT USE EMOJIS.
     """
 
@@ -842,26 +840,27 @@ def go_compare():
 
 # LANDING PAGE
 if st.session_state['page'] == 'home':
-    st.title("The Perception Bridge")
+    st.title("Sentiment vs. Reality")
     st.markdown("""
-    A platform that bridges public opinion and market reality. It analyzes social media sentiment and compares it with prediction market probabilities to reveal alignment, divergence, and bias—helping users see beyond echo chambers and hype.  \n\n
-    Select an analysis mode to begin.
+    See what the internet feels vs. where the money is betting. We compare social noise with market odds to show you the difference between opinion and reality.
+
+    Select a path to begin:
     """)
     st.divider()
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.info("### Single Source Analysis")
-        st.write("Deep dive into **X** sentiment, historical trends, and relevant prediction markets.")
-        if st.button("Start Single Analysis", use_container_width=True):
+        st.info("### Deep Dive")
+        st.write("Analyze one topic to see the gap between social noise and real betting odds.")
+        if st.button("Start Deep Dive", use_container_width=True):
             go_single()
             st.rerun()
 
     with col2:
-        st.warning("### Source Comparison")
-        st.write("Head-to-head showdown: **X vs. Reddit**. Compare sentiment, vibe, and confidence levels.")
-        if st.button("Start Comparison", use_container_width=True):
+        st.warning("### X vs. Reddit")
+        st.write("Compare the vibe across different platforms.")
+        if st.button("Compare Platforms", use_container_width=True):
             go_compare()
             st.rerun()
 
@@ -869,15 +868,15 @@ else:
     # COMMON HEADER FOR SUB-PAGES
     c1, c2 = st.columns([1, 5])
     with c1:
-        if st.button("← Home"):
+        if st.button("← Back"):
             go_home()
             st.rerun()
     with c2:
-        st.title("The Perception Bridge")
+        st.title("Sentiment vs. Reality")
 
-    user_text = st.text_input("Enter a keyword or topic (ex: bitcoin, inflation, elections)")
+    user_text = st.text_input("What topic are you curious about?", placeholder="e.g. Bitcoin, Election, Inflation")
 
-    if st.button("Run Analysis") and user_text.strip():
+    if st.button("Reveal the Truth") and user_text.strip():
 
         # ======================================================
         # PAGE 1: SINGLE SOURCE ANALYSIS
@@ -886,27 +885,27 @@ else:
             # Force X for deep analysis as per user request
             data_source = "X"
             
-            with st.status(f"Scanning X...", expanded=True) as status:
+            with st.status(f"Reading the internet...", expanded=True) as status:
                 result = analyze_topic_data(user_text, data_source)
                 if not result:
-                    st.error(f"No data found on {data_source}.")
+                    st.error(f"Couldn't hear any chatter about {data_source}.")
                     st.stop()
-                status.update(label="Analysis complete!", state="complete", expanded=False)
+                status.update(label="Done reading.", state="complete", expanded=False)
 
             # RENDER SECTION 1
-            st.header("Public Sentiment Analysis")
+            st.header("The Vibe")
             col1, col2, col3 = st.columns(3)
-            col1.metric("Sentiment Score", f"{result['sentiment']:.2f}")
-            col2.metric("Confidence Level", f"{result['confidence']:.0%}")
-            col3.metric("Volume", f"{result['count']}")
+            col1.metric("Vibe Score", f"{result['sentiment']:.2f}")
+            col2.metric("Conviction", f"{result['confidence']:.0%}")
+            col3.metric("Chatter Volume", f"{result['count']}")
             
-            st.subheader("Current Narrative")
+            st.subheader("What they're saying")
             st.write(result['narrative'])
-            st.subheader("Public Discussion")
+            st.subheader("Key themes")
             st.markdown(result['discussion'])
             
             # HISTORICAL
-            st.subheader("Historical Trend (1 Year)")
+            st.subheader("How the feeling changed (12mo)")
             # Always X
             df_history = fetch_historical_sentiment(user_text, result['confidence'], result['sentiment'])
                  
@@ -917,8 +916,8 @@ else:
             st.divider()
 
             # RENDER SECTION 2 (Legacy Logic maintained for Single View)
-            st.header("Relevant Polymarket Events")
-            with st.spinner("Finding markets..."):
+            st.header("Where The Money Is")
+            with st.spinner("Checking prediction markets..."):
                 events = fetch_events()
                 final_events = find_relevant_events(user_text, events)
 
@@ -937,7 +936,7 @@ else:
                     except Exception as e:
                         return {"event": ev, "title": ev['title'], "odds": "Error", "sentiment": f"Analysis failed: {e}"}
 
-                with st.spinner("Analyzing market odds and sentiment..."):
+                with st.spinner("Crunching the numbers..."):
                     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                         processed_markets = list(executor.map(process_market, final_events))
 
@@ -949,8 +948,8 @@ else:
                          st.code(pm['sentiment'], language=None)
             
             # Deep Insights
-            st.header("Deep Insights")
-            with st.spinner("Synthesizing..."):
+            st.header("The Reality Check")
+            with st.spinner("Connecting the dots..."):
                 comp_text = generate_comparison(user_text, result['narrative'], market_insights, result['sentiment'], result['confidence'])
                 # We skip history summary generation for speed in this refactor, or we can add it back if critical
                 deep = generate_deep_insights(user_text, result['narrative'], comp_text, "History skipped", market_insights)
@@ -961,12 +960,12 @@ else:
         # PAGE 2: SOURCE COMPARISON
         # ======================================================
         if st.session_state['page'] == 'compare':
-            st.write("## Source Showdown: X vs. Reddit")
+            st.write("## X vs. Reddit: Who's Right?")
             
             col_twitter, col_reddit = st.columns(2)
         
             # Parallel Execution for both sources
-            with st.status("Analyzing both platforms...", expanded=True):
+            with st.status("Listening to both sides...", expanded=True):
                 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                     future_tw = executor.submit(analyze_topic_data, user_text, "X")
                     future_rd = executor.submit(analyze_topic_data, user_text, "Reddit")
@@ -980,13 +979,13 @@ else:
                 if res_tw:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Sentiment", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                    m2.metric("Confidence", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
+                    m1.metric("Vibe", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
+                    m2.metric("Conviction", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
                     m3.metric("Volume", f"{res_tw['count']}")
                     
                     st.info(res_tw['discussion'])
                 else:
-                    st.error("No X data found.")
+                    st.error("Crickets on X.")
                     
             # RIGHT COLUMN: REDDIT
             with col_reddit:
@@ -994,19 +993,19 @@ else:
                 if res_rd:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Sentiment", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                    m2.metric("Confidence", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
+                    m1.metric("Vibe", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
+                    m2.metric("Conviction", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
                     m3.metric("Volume", f"{res_rd['count']}")
                     
                     st.info(res_rd['discussion'])
                 else:
-                    st.error("No Reddit data found.")
+                    st.error("Radio silence on Reddit.")
     
             st.divider()
             
             # CROSS ANALYSIS
             if res_tw and res_rd:
-                st.write("## Comparative Analysis")
-                with st.spinner("Comparing platform vibes..."):
+                st.write("## The Verdict")
+                with st.spinner("Reading between the lines..."):
                     comparison = generate_cross_platform_comparison(user_text, res_tw, res_rd)
                     st.markdown(comparison)
