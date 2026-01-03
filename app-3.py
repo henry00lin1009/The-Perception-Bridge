@@ -925,10 +925,10 @@ if st.session_state['page'] == 'home':
     col1, col2 = st.columns(2)
     
     with col1:
-        st.info("### Deep Dive")
-        st.write("Analyze one topic to see the gap between X discussion and real betting odds.")
+        st.info("### X vs. Polymarket")
+        st.write("Compare what X is saying vs. how Polymarket is betting.")
         st.caption("_Example: Enter 'Bitcoin' to see if X is bullish while the market bets on a crash._")
-        if st.button("Start Deep Dive", use_container_width=True):
+        if st.button("Start Analysis", use_container_width=True):
             go_single()
             st.rerun()
 
