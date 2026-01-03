@@ -928,7 +928,7 @@ if st.session_state['page'] == 'home':
         st.info("### X vs. Polymarket")
         st.write("Compare what X is saying vs. how Polymarket is betting.")
         st.caption("_Example: Enter 'Bitcoin' to see if X is bullish while the market bets on a crash._")
-        if st.button("Compare Platform", use_container_width=True, key="btn_x_poly"):
+        if st.button("Compare Platforms", use_container_width=True, key="btn_x_poly"):
             go_single()
             st.rerun()
 
