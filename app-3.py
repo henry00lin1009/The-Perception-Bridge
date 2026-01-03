@@ -979,9 +979,9 @@ else:
             conv_color = get_color_for_conviction(result['confidence'])
             
             with col1:
-                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1). /n  -1 means very negative, 1 means very positive.")
+                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1). \n -1 means very negative, 1 means very positive.")
             with col2:
-                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%). /n  Higher values mean people are more sure of their stance.")
+                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%). \n Higher values mean people are more sure of their stance.")
             with col3:
                 st.metric("Chatter Volume", f"{result['count']}", help="Volume: Number of posts found")
             
