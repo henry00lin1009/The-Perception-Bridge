@@ -605,6 +605,20 @@ def calculate_sentiment_metrics(tweets):
 
 
 # ======================================================
+# 7.6.5️⃣ HELPER: READABLE LABELS
+# ======================================================
+def get_vibe_label(score):
+    if score >= 0.05: return "Positive"
+    if score <= -0.05: return "Negative"
+    return "Neutral"
+
+def get_conviction_label(conf):
+    if conf >= 0.5: return "High"
+    if conf >= 0.25: return "Medium"
+    return "Low"
+
+
+# ======================================================
 # 7.7️⃣ HISTORICAL TIME SERIES (12 Months)
 # ======================================================
 def fetch_historical_sentiment(topic, current_confidence=None, current_sentiment=None):
@@ -852,8 +866,8 @@ if st.session_state['page'] == 'home':
     
     with col1:
         st.info("### Deep Dive")
-        st.write("Analyze one topic to see the gap between social noise and real betting odds.")
-        st.caption("_Example: Enter 'Bitcoin' to see if Twitter is bullish while the market bets on a crash._")
+        st.write("Analyze one topic to see the gap between X discussion and real betting odds.")
+        st.caption("_Example: Enter 'Bitcoin' to see if X is bullish while the market bets on a crash._")
         if st.button("Start Deep Dive", use_container_width=True):
             go_single()
             st.rerun()
@@ -897,8 +911,12 @@ else:
             # RENDER SECTION 1
             st.header("The Vibe")
             col1, col2, col3 = st.columns(3)
-            col1.metric("Vibe Score", f"{result['sentiment']:.2f}")
-            col2.metric("Conviction", f"{result['confidence']:.0%}")
+            
+            vibe_label = get_vibe_label(result['sentiment'])
+            conviction_label = get_conviction_label(result['confidence'])
+            
+            col1.metric("Vibe", vibe_label, help=f"Score: {result['sentiment']:.2f}")
+            col2.metric("Conviction", conviction_label, help=f"Level: {result['confidence']:.0%}")
             col3.metric("Chatter Volume", f"{result['count']}")
             
             st.subheader("What they're saying")
@@ -981,8 +999,8 @@ else:
                 if res_tw:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", f"{res_tw['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                    m2.metric("Conviction", f"{res_tw['confidence']:.0%}", help="How strong the opinions are")
+                    m1.metric("Vibe", get_vibe_label(res_tw['sentiment']), help=f"{res_tw['sentiment']:.2f}")
+                    m2.metric("Conviction", get_conviction_label(res_tw['confidence']), help=f"{res_tw['confidence']:.0%}")
                     m3.metric("Volume", f"{res_tw['count']}")
                     
                     st.info(res_tw['discussion'])
@@ -995,8 +1013,8 @@ else:
                 if res_rd:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", f"{res_rd['sentiment']:.2f}", delta_color="normal", help="-1 to 1")
-                    m2.metric("Conviction", f"{res_rd['confidence']:.0%}", help="How strong the opinions are")
+                    m1.metric("Vibe", get_vibe_label(res_rd['sentiment']), help=f"{res_rd['sentiment']:.2f}")
+                    m2.metric("Conviction", get_conviction_label(res_rd['confidence']), help=f"{res_rd['confidence']:.0%}")
                     m3.metric("Volume", f"{res_rd['count']}")
                     
                     st.info(res_rd['discussion'])
