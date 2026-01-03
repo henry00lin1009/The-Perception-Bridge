@@ -617,6 +617,30 @@ def get_conviction_label(conf):
     if conf >= 0.25: return "Medium"
     return "Low"
 
+def get_color_for_vibe(score):
+    if score >= 0.05: return "#D32F2F" # Red for Positive (Per user request)
+    if score <= -0.05: return "#388E3C" # Green for Negative
+    return "#757575" # Neutral (Gray)
+
+def get_color_for_conviction(conf):
+    if conf >= 0.5: return "#D32F2F" # High -> Red? Or maybe keep consistent intensity? Let's use standard high-intensity color or Red if 'Positive' vibe. 
+    # User asked "Positive -> Red, Negative -> Green, Medium -> Yellow".
+    # Assuming Conviction "Medium" -> Yellow.
+    if conf >= 0.5: return "#333333" # High -> Black/Dark
+    if conf >= 0.25: return "#FBC02D" # Medium -> Yellow/Amber
+    return "#757575" # Low -> Gray
+
+def render_custom_metric(label, value, extra, color, tooltip):
+    st.markdown(f"""
+    <div style="margin-bottom: 10px;">
+        <span style="font-size: 0.8em; color: gray;">{label}</span>
+        <span title="{tooltip}" style="cursor: help; font-size: 0.8em; margin-left: 4px;">ⓘ</span>
+        <div style="font-size: 1.8em; font-weight: 600; color: {color}; line-height: 1.2;">
+            {value} <span style="font-size: 0.6em; opacity: 0.8; margin-left: 5px;">{extra}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # ======================================================
 # 7.7️⃣ HISTORICAL TIME SERIES (12 Months)
@@ -913,11 +937,17 @@ else:
             col1, col2, col3 = st.columns(3)
             
             vibe_label = get_vibe_label(result['sentiment'])
-            conviction_label = get_conviction_label(result['confidence'])
+            vibe_color = get_color_for_vibe(result['sentiment'])
             
-            col1.metric("Vibe", vibe_label, delta=f"{result['sentiment']:.2f}")
-            col2.metric("Conviction", conviction_label, delta=f"{result['confidence']:.0%}", delta_color="off")
-            col3.metric("Chatter Volume", f"{result['count']}")
+            conviction_label = get_conviction_label(result['confidence'])
+            conv_color = get_color_for_conviction(result['confidence'])
+            
+            with col1:
+                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1)")
+            with col2:
+                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%)")
+            with col3:
+                st.metric("Chatter Volume", f"{result['count']}")
             
             st.subheader("What they're saying")
             st.write(result['narrative'])
@@ -999,9 +1029,18 @@ else:
                 if res_tw:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", get_vibe_label(res_tw['sentiment']), delta=f"{res_tw['sentiment']:.2f}")
-                    m2.metric("Conviction", get_conviction_label(res_tw['confidence']), delta=f"{res_tw['confidence']:.0%}", delta_color="off")
-                    m3.metric("Volume", f"{res_tw['count']}")
+                    
+                    v_lab = get_vibe_label(res_tw['sentiment'])
+                    v_col = get_color_for_vibe(res_tw['sentiment'])
+                    c_lab = get_conviction_label(res_tw['confidence'])
+                    c_col = get_color_for_conviction(res_tw['confidence'])
+                    
+                    with m1:
+                        render_custom_metric("Vibe", v_lab, f"{res_tw['sentiment']:.2f}", v_col, "Sentiment Score")
+                    with m2:
+                        render_custom_metric("Conviction", c_lab, f"{res_tw['confidence']:.0%}", c_col, "Confidence Level")
+                    with m3:
+                        st.metric("Volume", f"{res_tw['count']}")
                     
                     st.info(res_tw['discussion'])
                 else:
@@ -1013,9 +1052,18 @@ else:
                 if res_rd:
                     # Split metrics
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Vibe", get_vibe_label(res_rd['sentiment']), delta=f"{res_rd['sentiment']:.2f}")
-                    m2.metric("Conviction", get_conviction_label(res_rd['confidence']), delta=f"{res_rd['confidence']:.0%}", delta_color="off")
-                    m3.metric("Volume", f"{res_rd['count']}")
+                    
+                    v_lab = get_vibe_label(res_rd['sentiment'])
+                    v_col = get_color_for_vibe(res_rd['sentiment'])
+                    c_lab = get_conviction_label(res_rd['confidence'])
+                    c_col = get_color_for_conviction(res_rd['confidence'])
+                    
+                    with m1:
+                        render_custom_metric("Vibe", v_lab, f"{res_rd['sentiment']:.2f}", v_col, "Sentiment Score")
+                    with m2:
+                        render_custom_metric("Conviction", c_lab, f"{res_rd['confidence']:.0%}", c_col, "Confidence Level")
+                    with m3:
+                        st.metric("Volume", f"{res_rd['count']}")
                     
                     st.info(res_rd['discussion'])
                 else:
