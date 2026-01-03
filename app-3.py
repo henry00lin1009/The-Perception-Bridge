@@ -940,6 +940,16 @@ if st.session_state['page'] == 'home':
             go_compare()
             st.rerun()
 
+    st.divider()
+    st.subheader("Our Goal")
+    st.write("Sentiment vs. Reality was built to help you escape the echo chamber. Social media algorithms often trap us in filtered views, making it hard to see how others truly feel or where discussions are heading. Our platform gives you a more grounded understanding of public sentiment.")
+
+    st.subheader("Functionality")
+    st.write("The platform analyzes social media conversations and prediction market behavior to reveal the gap between what people say and where real money is placed. You can deep dive into a single topic to see the intensity and sentiment of discussions compared to market odds, or compare multiple platforms to explore contrasting perspectives.")
+
+    st.subheader("Takeaway")
+    st.write("By highlighting alignment and divergence between public chatter and market behavior, Sentiment vs. Reality helps you identify trends, gauge confidence, and make sense of collective opinion beyond likes, shares, and hype. It’s a tool for seeing the bigger picture and making informed judgments about what the world really thinks.")
+
 else:
     # COMMON HEADER FOR SUB-PAGES
     c1, c2 = st.columns([1, 5])
@@ -979,9 +989,9 @@ else:
             conv_color = get_color_for_conviction(result['confidence'])
             
             with col1:
-                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1). \n -1 means very negative, 1 means very positive.")
+                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1). -1 means very negative, 1 means very positive.")
             with col2:
-                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%). \n Higher values mean people are more sure of their stance.")
+                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%). Higher values mean people are more sure of their stance.")
             with col3:
                 st.metric("Chatter Volume", f"{result['count']}", help="Volume: Number of posts found")
             
