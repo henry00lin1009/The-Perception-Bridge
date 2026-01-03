@@ -853,7 +853,7 @@ if st.session_state['page'] == 'home':
     with col1:
         st.info("### Deep Dive")
         st.write("Analyze one topic to see the gap between social noise and real betting odds.")
-        st.caption("Try: *Bitcoin, Election, Rates*")
+        st.caption("_Example: Enter 'Bitcoin' to see if Twitter is bullish while the market bets on a crash._")
         if st.button("Start Deep Dive", use_container_width=True):
             go_single()
             st.rerun()
@@ -861,7 +861,7 @@ if st.session_state['page'] == 'home':
     with col2:
         st.warning("### X vs. Reddit")
         st.write("Compare the vibe across different platforms.")
-        st.caption("Try: *Tesla, Gaming, AI*")
+        st.caption("_Example: see if Reddit is panicking about 'Inflation' while X is ignoring it._")
         if st.button("Compare Platforms", use_container_width=True):
             go_compare()
             st.rerun()
