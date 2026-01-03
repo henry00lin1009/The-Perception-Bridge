@@ -979,9 +979,9 @@ else:
             conv_color = get_color_for_conviction(result['confidence'])
             
             with col1:
-                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1)")
+                render_custom_metric("Vibe", vibe_label, f"{result['sentiment']:.2f}", vibe_color, "Sentiment score (-1 to 1). -1 means very negative, 1 means very positive.")
             with col2:
-                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%)")
+                render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%). Higher values mean people are more sure of their stance.")
             with col3:
                 st.metric("Chatter Volume", f"{result['count']}", help="Volume: Number of posts found")
             
@@ -1072,9 +1072,9 @@ else:
                     c_col = get_color_for_conviction(res_tw['confidence'])
                     
                     with m1:
-                        render_custom_metric("Vibe", v_lab, f"{res_tw['sentiment']:.2f}", v_col, "Sentiment Score")
+                        render_custom_metric("Vibe", v_lab, f"{res_tw['sentiment']:.2f}", v_col, "Sentiment score (-1 to 1). -1 means very negative, 1 means very positive.")
                     with m2:
-                        render_custom_metric("Conviction", c_lab, f"{res_tw['confidence']:.0%}", c_col, "Confidence Level")
+                        render_custom_metric("Conviction", c_lab, f"{res_tw['confidence']:.0%}", c_col, "Strength of opinion (0-100%). Higher values mean people are more sure of their stance.")
                     with m3:
                         st.metric("Volume", f"{res_tw['count']}", help="Volume: Number of posts found")
                     
@@ -1095,9 +1095,9 @@ else:
                     c_col = get_color_for_conviction(res_rd['confidence'])
                     
                     with m1:
-                        render_custom_metric("Vibe", v_lab, f"{res_rd['sentiment']:.2f}", v_col, "Sentiment Score")
+                        render_custom_metric("Vibe", v_lab, f"{res_rd['sentiment']:.2f}", v_col, "Sentiment score (-1 to 1). -1 means very negative, 1 means very positive.")
                     with m2:
-                        render_custom_metric("Conviction", c_lab, f"{res_rd['confidence']:.0%}", c_col, "Confidence Level")
+                        render_custom_metric("Conviction", c_lab, f"{res_rd['confidence']:.0%}", c_col, "Strength of opinion (0-100%). Higher values mean people are more sure of their stance.")
                     with m3:
                         st.metric("Volume", f"{res_rd['count']}", help="Volume: Number of posts found")
                     
