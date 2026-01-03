@@ -631,15 +631,51 @@ def get_color_for_conviction(conf):
     return "#757575" # Low -> Gray
 
 def render_custom_metric(label, value, extra, color, tooltip):
-    st.markdown(f"""
+    # CSS for Tooltip
+    tooltip_css = """
+    <style>
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      font-size: 0.8rem;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    </style>
+    """
+    
+    html = f"""
+    {tooltip_css}
     <div style="margin-bottom: 10px;">
         <span style="font-size: 0.8em; color: gray;">{label}</span>
-        <span title="{tooltip}" style="cursor: help; font-size: 0.8em; margin-left: 4px;">ⓘ</span>
+        <div class="tooltip" style="font-size: 0.8em; margin-left: 4px;">ⓘ
+            <span class="tooltiptext">{tooltip}</span>
+        </div>
         <div style="font-size: 1.8em; font-weight: 600; color: {color}; line-height: 1.2;">
             {value} <span style="font-size: 0.6em; opacity: 0.8; margin-left: 5px;">{extra}</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(html, unsafe_allow_html=True)
 
 
 # ======================================================
@@ -947,7 +983,7 @@ else:
             with col2:
                 render_custom_metric("Conviction", conviction_label, f"{result['confidence']:.0%}", conv_color, "Strength of opinion (0-100%)")
             with col3:
-                st.metric("Chatter Volume", f"{result['count']}")
+                st.metric("Chatter Volume", f"{result['count']}", help="Volume: Number of posts found")
             
             st.subheader("What they're saying")
             st.write(result['narrative'])
@@ -1040,7 +1076,7 @@ else:
                     with m2:
                         render_custom_metric("Conviction", c_lab, f"{res_tw['confidence']:.0%}", c_col, "Confidence Level")
                     with m3:
-                        st.metric("Volume", f"{res_tw['count']}")
+                        st.metric("Volume", f"{res_tw['count']}", help="Volume: Number of posts found")
                     
                     st.info(res_tw['discussion'])
                 else:
@@ -1063,7 +1099,7 @@ else:
                     with m2:
                         render_custom_metric("Conviction", c_lab, f"{res_rd['confidence']:.0%}", c_col, "Confidence Level")
                     with m3:
-                        st.metric("Volume", f"{res_rd['count']}")
+                        st.metric("Volume", f"{res_rd['count']}", help="Volume: Number of posts found")
                     
                     st.info(res_rd['discussion'])
                 else:
